@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050409">
+<title>Han Visuals — Dark Deco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Limelight&family=Poiret+One&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#e9e2d3; --gold:#c9a45c; --window:#dfe8a8; --warmwin:#ecd8a4; --red:#a92718; --dim:#9a8f7c; --col:min(100vw,480px); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{background:#050409;color:var(--paper);font-family:'Jost','Avenir Next','Futura',sans-serif;font-weight:300;overflow-x:hidden}
+  ::selection{background:var(--red);color:var(--paper)}
+  img,video{display:block;max-width:100%}
+  .wordmark{font-family:'Limelight','Copperplate',cursive;font-weight:400}
+  .head{font-family:'Poiret One','Optima','Futura',cursive;font-weight:400;letter-spacing:.16em;text-transform:uppercase}
+  .eyebrow{font-size:.66rem;letter-spacing:.44em;text-transform:uppercase;color:var(--gold)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--window);outline-offset:3px}
+
+  /* desktop deco-cinema surround */
+  #surround{position:fixed;inset:0;z-index:0;pointer-events:none;background:#050409}
+  #surround::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(120% 80% at 50% 0%,rgba(50,16,16,.45),transparent 60%),
+      repeating-linear-gradient(90deg,#0b0912 0 22px,#0e0b16 22px 26px),#070610;filter:blur(2px) brightness(.5)}
+  #surround::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 45%,transparent,rgba(0,0,0,.55) 100%)}
+  @media (max-width:520px){ #surround{display:none} }
+
+  /* fixed camera viewport + scroll track */
+  #cine{position:fixed;top:0;left:50%;transform:translateX(-50%);width:var(--col);height:100svh;z-index:2;overflow:hidden;background:#08070e}
+  @media (min-width:521px){ #cine{border-left:1px solid #05040a;border-right:1px solid #05040a} }
+  #track{position:relative;z-index:1}
+  .clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;
+    will-change:opacity;background:#08070e}
+  .clip.show{opacity:1}
+  #poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+
+  /* film treatment */
+  .grain{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:40;opacity:.07;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grain 1.2s steps(4) infinite}
+  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-2%,1.5%)}50%{transform:translate(1.5%,-2%)}75%{transform:translate(-1%,-1%)}100%{transform:translate(2%,2%)}}
+  .vig{position:fixed;inset:0;pointer-events:none;z-index:38;background:radial-gradient(130% 100% at 50% 42%,transparent 55%,rgba(0,0,0,.5) 100%)}
+
+  #rail{position:fixed;top:50%;left:max(12px,calc(50vw - var(--col)/2 + 12px));transform:translateY(-50%);z-index:30;pointer-events:none;opacity:0;transition:opacity .5s ease}
+  #rail .no{font-family:'Limelight',cursive;font-size:1.7rem;color:var(--warmwin);text-shadow:0 2px 14px rgba(0,0,0,.9);line-height:1}
+  #rail .lb{display:block;font-size:.52rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-top:.4rem;max-width:8ch}
+
+  .hero-copy{position:absolute;left:0;right:0;top:12svh;text-align:center;padding:0 1.2rem;z-index:6;pointer-events:none;will-change:opacity,transform}
+  .hero-copy .eyebrow{color:#e8cf9a;text-shadow:0 2px 12px rgba(0,0,0,.95)}
+  .hero-copy h1{font-size:clamp(2.4rem,9vw,3.8rem);margin-top:.7rem;line-height:1.04;color:var(--paper);text-shadow:0 3px 0 rgba(0,0,0,.6),0 18px 60px rgba(0,0,0,.9)}
+  .hero-copy .sub{margin-top:.8rem;font-size:clamp(.56rem,2.5vw,.68rem);letter-spacing:.3em;text-transform:uppercase;color:rgba(233,226,211,.85);text-shadow:0 2px 12px rgba(0,0,0,.95)}
+  .cue{position:absolute;left:50%;bottom:6svh;transform:translateX(-50%);z-index:6;color:var(--gold);font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;white-space:nowrap;animation:cue 2.4s ease-in-out infinite;pointer-events:none}
+  .cue::after{content:'▾';display:block;text-align:center;margin-top:.3rem;font-size:1rem}
+  @keyframes cue{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
+
+  /* caption + watch, shown when the playhead rests on a scene */
+  .scene-ui{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:5rem 1.4rem 2.1rem;pointer-events:none;opacity:0;transition:opacity .45s ease;
+    background:linear-gradient(to top,rgba(6,5,10,.92),rgba(6,5,10,.45) 45%,transparent)}
+  .scene-ui.show{opacity:1}
+  .scene-ui h3{font-family:'Poiret One','Optima',cursive;font-weight:400;font-size:1.25rem;letter-spacing:.14em;text-transform:uppercase;color:#f2ebda;margin-bottom:.4rem}
+  .scene-ui p{color:#c3baaa;font-size:.9rem;line-height:1.5;max-width:32ch}
+  .watch{pointer-events:auto;display:none;align-items:center;gap:.5rem;margin-top:.9rem;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--warmwin);border:1px solid rgba(201,164,92,.5);padding:.55rem 1rem;background:rgba(201,164,92,.06);cursor:pointer;transition:background .3s,border-color .3s}
+  .scene-ui.has-reel .watch{display:inline-flex}
+  .watch:hover{background:rgba(201,164,92,.16);border-color:var(--warmwin)}
+
+  /* end contact card */
+  #contact{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:var(--col);z-index:6;text-align:center;padding:2.2rem 1.4rem calc(2.4rem + env(safe-area-inset-bottom));pointer-events:none;opacity:0;transition:opacity .5s ease;
+    background:linear-gradient(to top,rgba(5,4,9,.96),rgba(5,4,9,.6) 60%,transparent)}
+  #contact.show{opacity:1;pointer-events:auto}
+  #contact h2{font-size:clamp(1.3rem,4.5vw,1.8rem)}
+  #contact p{color:var(--dim);max-width:38ch;margin:.9rem auto 1.2rem;font-size:.9rem}
+  .mail{font-family:'Poiret One','Optima',cursive;font-size:clamp(1.2rem,4.5vw,1.7rem);letter-spacing:.1em;color:var(--window);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.25rem}
+  .mail:hover{color:var(--paper);border-color:var(--window)}
+  #contact footer{margin-top:1.6rem;color:#544a3c;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase}
+
+  /* portfolio lightbox */
+  #lb{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(4,3,8,.93);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:4vw}
+  #lb.open{display:flex}
+  #lbInner{width:min(94vw,900px);max-height:92svh;display:flex;flex-direction:column;gap:1rem}
+  #lbStage{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:4px solid #05040c;box-shadow:0 0 0 1px rgba(201,164,92,.3),0 30px 80px rgba(0,0,0,.7);overflow:hidden}
+  #lbStage iframe,#lbStage video{position:absolute;inset:0;width:100%;height:100%;border:0}
+  #lbEmpty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;color:#8f8674;font-size:.85rem;line-height:1.6}
+  #lbHead{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+  #lbHead h4{font-family:'Poiret One',cursive;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:#f2ebda;font-size:1.05rem}
+  #lbClose{cursor:pointer;background:none;border:1px solid rgba(201,164,92,.5);color:var(--warmwin);font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;padding:.5rem .9rem}
+  #lbClose:hover{background:rgba(201,164,92,.16)}
+  #lbCards{display:flex;gap:.7rem;overflow-x:auto;padding-bottom:.3rem}
+  .lbcard{flex:0 0 auto;cursor:pointer;border:1px solid #3a2f1e;background:rgba(201,164,92,.05);padding:.6rem .9rem;min-width:140px}
+  .lbcard.active{border-color:var(--warmwin);background:rgba(201,164,92,.15)}
+  .lbcard .t{font-size:.72rem;color:#e6d9bd;display:block}
+  .lbcard .m{font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:#8f8674;margin-top:.3rem;display:block}
+
+  @media (prefers-reduced-motion:reduce){ .grain,.cue{animation:none} }
+</style>
+</head>
+<body>
+
+<!-- ================= HAN: paste your real portfolio links here ================= -->
+<script>
+window.PORTFOLIO = {
+  craft:  [ /* { title:"The Shoelace Slider", meta:"500K+ views", url:"https://youtu.be/XXXXXXXXXXX" } */ ],
+  events: [ /* { title:"Venue Campaign Film", meta:"event", url:"https://vimeo.com/XXXXXXXXX" } */ ],
+  music:  [ /* { title:"Artist — Track", meta:"music video", url:"https://youtu.be/XXXXXXXXXXX" } */ ],
+};
+</script>
+
+<div id="surround" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vig" aria-hidden="true"></div>
+<div id="rail" aria-hidden="true"><span class="no" id="railNo"></span><span class="lb" id="railLb"></span></div>
+
+<div id="cine">
+  <img id="poster" src="./assets/open-far.jpg" alt="An art deco tower over a dense foggy blood-red night city">
+  <!-- clips fill in over the poster; order = the one continuous descent -->
+  <div class="hero-copy" id="heroCopy">
+    <span class="eyebrow">Videographer · Editor · NJ / NY</span>
+    <h1 class="wordmark">Han Visuals</h1>
+    <p class="sub">Shot after dark · No stock · No gloss</p>
+  </div>
+  <span class="cue" id="cue">Descend</span>
+
+  <div class="scene-ui" id="sceneUI">
+    <h3 id="scTitle"></h3>
+    <p id="scText"></p>
+    <button class="watch" id="scWatch"><span>▷</span> Watch the reel</button>
+  </div>
+</div>
+
+<div id="track"></div>
+
+<div id="contact" aria-hidden="true">
+  <h2 class="head">Work Together</h2>
+  <p>Gear collabs, campaign films, music videos, content partnerships. One email starts it.</p>
+  <a class="mail" href="mailto:han@hanvisuals.co">han@hanvisuals.co</a>
+  <footer>Han Visuals — painted on black paper</footer>
+</div>
+
+<div id="lb" aria-hidden="true">
+  <div id="lbInner">
+    <div id="lbHead"><h4 id="lbTitle">Selected Work</h4><button id="lbClose">Close ✕</button></div>
+    <div id="lbStage"><div id="lbEmpty"></div></div>
+    <div id="lbCards"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(s){ return document.getElementById(s); };
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  /* ---- the film: ordered clips (one continuous descent) + the scenes they land on ---- */
+  var CLIPS = [
+    { src:'./assets/open-zoom.mp4' },           // 0  ONE continuous push: wide night city -> INTO Han's amber studio window
+    { src:'./assets/move-studio-events.mp4' },  // 1  studio -> events
+    { src:'./assets/move-events-craft.mp4' },   // 2  events -> craft
+    { src:'./assets/move-craft-music.mp4' },    // 3  craft -> music
+    { src:'./assets/move-music-car.mp4' },      // 4  music window -> descend to the street, arrive behind the muscle car
+    { src:'./assets/move-car-window.mp4' },     // 5  move to the driver's side window: HAN driving, silhouette  [Work Together]
+    { src:'./assets/move-window-city.mp4' },    // 6  car drives off through the deco city on the wet street
+    { src:'./assets/move-city-gotham.mp4' },    // 7  camera rises to the full Gotham dark-deco skyline (finale)
+  ];
+  /* window-floor scenes get a rail label + caption. The car finale surfaces the
+     "Work Together" contact card instead (see CONTACT_FROM below). */
+  var SCENES = [
+    { afterClip:0, floor:'61', label:'The Studio',  title:'Where it gets its teeth', text:'Sixty-one floors up. Harsh flash, heavy grain, editorial texture.' },
+    { afterClip:1, floor:'44', label:'Events',      title:'Event & Studio Films',     text:'Campaign films for venues and artists. Shot after dark.', reel:'events' },
+    { afterClip:2, floor:'44', label:'Craft',       title:'DIY Cinematography',       text:'Camera hacks from everyday objects. One object, three cinematic frames.', reel:'craft' },
+    { afterClip:3, floor:'44', label:'Music Videos',title:'Music Videos',             text:'Single artist, single spotlight. Performance cut like a short film.', reel:'music' },
+  ];
+  var CONTACT_FROM = 5.5;    // playhead where the side-window "it's Han driving" + "Work Together" beat begins
+
+  var cine = $('cine'), track = $('track'), poster = $('poster');
+  var heroCopy = $('heroCopy'), cue = $('cue'), railEl = $('rail'), railNo = $('railNo'), railLb = $('railLb');
+  var sceneUI = $('sceneUI'), scTitle = $('scTitle'), scText = $('scText'), scWatch = $('scWatch'), contact = $('contact');
+
+  /* build video elements. IMPORTANT: preload='none' — loading all 6 at once floods
+     the connection and NONE reaches even metadata. We warm only nearby clips. */
+  CLIPS.forEach(function(c, i){
+    var v = document.createElement('video');
+    v.className = 'clip'; v.muted = true; v.playsInline = true; v.preload = 'none';
+    v.setAttribute('muted',''); v.setAttribute('playsinline',''); v.setAttribute('aria-hidden','true');
+    v.src = c.src; v.dur = 4;                    // default until metadata says otherwise
+    v.addEventListener('loadedmetadata', function(){ if(v.duration && isFinite(v.duration)){ v.dur = v.duration; recompute(); } });
+    c.el = v; cine.insertBefore(v, heroCopy);
+  });
+  /* warm a clip (and only nearby clips) so downloads stay serialized and fast */
+  function warm(i){
+    if(i < 0 || i >= CLIPS.length) return;
+    var v = CLIPS[i].el;
+    if(v._warmed) return;
+    v._warmed = true; v.preload = 'auto';
+    try{ v.load(); }catch(e){}
+  }
+
+  /* cumulative timing */
+  var total = 0, cum = [];
+  function recompute(){
+    cum = []; total = 0;
+    for(var i=0;i<CLIPS.length;i++){ cum[i] = total; total += CLIPS[i].el.dur; }
+    layout();
+  }
+  var SEGVH = 1.25;                              // scroll height per clip-second, in units of vh/second? no — per clip
+  var perClip = 1;
+  function layout(){
+    perClip = Math.max(1, window.innerHeight * 1.4);   // scroll px per clip
+    track.style.height = (CLIPS.length * perClip + window.innerHeight * 0.5) + 'px';
+  }
+
+  function smooth(t){ return t*t*(3-2*t); }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  var shownScene = -1, activeIdx = -1;
+
+  /* THE camera: pure function of scroll y. Exposed for tests. */
+  function render(y){
+    var ph = clamp(y / perClip, 0, CLIPS.length - 0.0001);  // 0..N (playhead in clip units)
+    var idx = Math.floor(ph);
+    var local = ph - idx;                                    // 0..1 within clip
+    var clip = CLIPS[idx], v = clip.el;
+
+    /* serialized preloading: only load the current clip and its neighbours */
+    warm(idx); warm(idx + 1); warm(idx - 1);
+
+    /* scrub the active clip */
+    if(v.readyState >= 1 && v.dur){
+      var t = local * (v.dur - 0.04);
+      if(Math.abs(v.currentTime - t) > 0.03){ try{ v.currentTime = t; }catch(e){} }
+    }
+    /* show active on top, keep previous underneath for seamless boundary, hide the rest.
+       A clip is only shown once it actually has a decoded frame (readyState>=2) - otherwise
+       an un-buffered <video> paints BLACK over the poster. Until the active clip is ready we
+       fall through to the previous ready clip, or to the poster (the blue-city still). */
+    var activeReady = v.readyState >= 2;
+    for(var i=0;i<CLIPS.length;i++){
+      var el2 = CLIPS[i].el;
+      var on = ((i === idx) || (i === idx-1)) && el2.readyState >= 2;
+      el2.classList.toggle('show', on);
+      el2.style.zIndex = (i === idx ? 3 : (i === idx-1 ? 2 : 0));
+    }
+    /* poster stays up while the active clip can't paint yet (kills the black flash),
+       then fades out with the scroll over the opening clip. */
+    poster.style.opacity = !activeReady ? 1 : (idx === 0 ? (1 - smooth(clamp(local*4,0,1))) : 0);
+
+    /* hero copy fades across the first clip's opening */
+    var hp = clamp(ph / 0.5, 0, 1);
+    heroCopy.style.opacity = (1 - hp).toFixed(3);
+    heroCopy.style.transform = 'translateY(' + (-hp*28).toFixed(1) + 'px)';
+    cue.style.opacity = (1 - clamp(ph/0.2,0,1)).toFixed(3);
+
+    /* scenes: a resting beat at each clip boundary. Show chrome when the playhead
+       sits near the END of a clip (window centred) — i.e. local high, or start of next low. */
+    var best = -1, bestClo = 1;
+    for(var s=0;s<SCENES.length;s++){
+      var anchor = SCENES[s].afterClip + 1;                  // playhead value where this scene is centred
+      var d = Math.abs(ph - anchor);
+      if(d < 0.42 && d < bestClo){ bestClo = d; best = s; }
+    }
+    if(best !== shownScene){
+      shownScene = best;
+      if(best < 0){ sceneUI.classList.remove('show'); }
+      else{
+        var sc = SCENES[best];
+        scTitle.textContent = sc.title; scText.textContent = sc.text;
+        sceneUI.classList.toggle('has-reel', !!sc.reel);
+        scWatch.setAttribute('data-reel', sc.reel || '');
+        sceneUI.classList.add('show');
+        railNo.textContent = sc.floor; railLb.textContent = sc.label;
+      }
+    }
+    railEl.style.opacity = (best >= 0 ? 1 : 0);
+
+    /* "Work Together" card rides the in-car finale (interior beat -> drive-away) */
+    contact.classList.toggle('show', ph > CONTACT_FROM);
+
+    if(idx !== activeIdx) activeIdx = idx;
+  }
+  window.__render = render;
+  window.__info = function(){ return { total:total, cum:cum, durs:CLIPS.map(function(c){return c.el.dur;}) }; };
+
+  var ticking = false;
+  function onScroll(){ if(ticking) return; ticking = true; requestAnimationFrame(function(){ ticking = false; render(window.scrollY||window.pageYOffset); }); }
+  window.addEventListener('scroll', onScroll, { passive:true });
+
+  /* ---- portfolio lightbox ---- */
+  var lb = $('lb'), lbStage = $('lbStage'), lbCards = $('lbCards'), lbTitle = $('lbTitle'), lbEmpty = $('lbEmpty'), savedY = 0, lbOpen = false;
+  var LABELS = { craft:'DIY Cinematography', events:'Event & Studio Films', music:'Music Videos' };
+  function embed(item){
+    lbStage.querySelectorAll('iframe,video').forEach(function(n){ n.remove(); });
+    lbEmpty.style.display = 'none';
+    var url = item.url || '', yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/), vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/), f;
+    if(yt){ f=document.createElement('iframe'); f.src='https://www.youtube.com/embed/'+yt[1]+'?autoplay=1&rel=0&playsinline=1'; f.allow='autoplay; fullscreen; encrypted-media; picture-in-picture'; f.setAttribute('allowfullscreen',''); lbStage.appendChild(f); }
+    else if(vm){ f=document.createElement('iframe'); f.src='https://player.vimeo.com/video/'+vm[1]+'?autoplay=1'; f.allow='autoplay; fullscreen; picture-in-picture'; f.setAttribute('allowfullscreen',''); lbStage.appendChild(f); }
+    else if(url){ var vv=document.createElement('video'); vv.src=url; vv.controls=true; vv.autoplay=true; vv.playsInline=true; lbStage.appendChild(vv); }
+  }
+  function openLb(key){
+    var items = (window.PORTFOLIO && window.PORTFOLIO[key]) || [];
+    lbTitle.textContent = LABELS[key] || 'Selected Work';
+    lbCards.innerHTML=''; lbStage.querySelectorAll('iframe,video').forEach(function(n){ n.remove(); });
+    if(!items.length){ lbEmpty.style.display='flex'; lbEmpty.textContent='Reel coming soon — Han is threading the projector.'; }
+    else{ items.forEach(function(it,i){ var c=document.createElement('div'); c.className='lbcard'+(i===0?' active':''); c.innerHTML='<span class="t"></span><span class="m"></span>'; c.querySelector('.t').textContent=it.title||('Film '+(i+1)); c.querySelector('.m').textContent=it.meta||''; c.addEventListener('click',function(){ [].forEach.call(lbCards.children,function(x){x.classList.remove('active');}); c.classList.add('active'); embed(it); }); lbCards.appendChild(c); }); embed(items[0]); }
+    savedY = window.scrollY||window.pageYOffset;
+    document.body.style.position='fixed'; document.body.style.top=(-savedY)+'px'; document.body.style.left='0'; document.body.style.right='0';
+    lb.classList.add('open'); lbOpen=true;
+  }
+  function closeLb(){ lb.classList.remove('open'); lbOpen=false; lbStage.querySelectorAll('iframe,video').forEach(function(n){ n.remove(); }); document.body.style.position=''; document.body.style.top=''; document.body.style.left=''; document.body.style.right=''; window.scrollTo(0, savedY); }
+  scWatch.addEventListener('click', function(){ var r=scWatch.getAttribute('data-reel'); if(r) openLb(r); });
+  $('lbClose').addEventListener('click', closeLb);
+  lb.addEventListener('click', function(e){ if(e.target===lb) closeLb(); });
+  window.addEventListener('keydown', function(e){ if(e.key==='Escape' && lbOpen) closeLb(); });
+
+  /* ---- boot ---- */
+  function boot(){ window.scrollTo(0,0); recompute(); render(0); }
+  if(document.readyState==='complete') boot(); else window.addEventListener('load', boot);
+  document.addEventListener('DOMContentLoaded', function(){ recompute(); render(window.scrollY||0); });
+  var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(function(){ layout(); render(window.scrollY||0); }, 160); }, { passive:true });
+  window.addEventListener('pageshow', function(e){ if(e.persisted){ window.scrollTo(0,0); render(0); } });
+})();
+</script>
+</body>
+</html>
