@@ -222,8 +222,8 @@ window.PORTFOLIO = {
     var local = ph - idx;                                    // 0..1 within clip
     var clip = CLIPS[idx], v = clip.el;
 
-    /* serialized preloading: only load the current clip and its neighbours */
-    warm(idx); warm(idx + 1); warm(idx - 1);
+    /* preload current + the next two + previous so a boundary never stalls the glide */
+    warm(idx); warm(idx + 1); warm(idx + 2); warm(idx - 1);
 
     /* scrub the active clip */
     if(v.readyState >= 1 && v.dur){
@@ -281,9 +281,21 @@ window.PORTFOLIO = {
   window.__render = render;
   window.__info = function(){ return { total:total, cum:cum, durs:CLIPS.map(function(c){return c.el.dur;}) }; };
 
-  var ticking = false;
-  function onScroll(){ if(ticking) return; ticking = true; requestAnimationFrame(function(){ ticking = false; render(window.scrollY||window.pageYOffset); }); }
-  window.addEventListener('scroll', onScroll, { passive:true });
+  /* Buttery scrub: instead of driving the film straight off the raw scroll value
+     (which is stepped and jittery, so the video visibly catches), a continuous rAF
+     loop EASES a smoothed value toward the real scroll position and renders that.
+     The film then glides to where you scrolled instead of snapping frame-to-frame. */
+  var ySmooth = 0, running = false;
+  function tick(){
+    var yTarget = window.scrollY || window.pageYOffset;
+    var d = yTarget - ySmooth;
+    ySmooth += d * 0.2;
+    if(Math.abs(d) < 0.5){ ySmooth = yTarget; render(ySmooth); running = false; return; }
+    render(ySmooth);
+    requestAnimationFrame(tick);
+  }
+  function kick(){ if(!running){ running = true; requestAnimationFrame(tick); } }
+  window.addEventListener('scroll', kick, { passive:true });
 
   /* ---- portfolio lightbox ---- */
   var lb = $('lb'), lbStage = $('lbStage'), lbCards = $('lbCards'), lbTitle = $('lbTitle'), lbEmpty = $('lbEmpty'), savedY = 0, lbOpen = false;
@@ -313,7 +325,9 @@ window.PORTFOLIO = {
   window.addEventListener('keydown', function(e){ if(e.key==='Escape' && lbOpen) closeLb(); });
 
   /* ---- boot ---- */
-  function boot(){ window.scrollTo(0,0); recompute(); render(0); }
+  function boot(){ window.scrollTo(0,0); recompute(); render(0);
+    /* once the page has settled, quietly preload every clip so no seam ever stalls */
+    setTimeout(function(){ for(var i=0;i<CLIPS.length;i++) warm(i); }, 2000); }
   if(document.readyState==='complete') boot(); else window.addEventListener('load', boot);
   document.addEventListener('DOMContentLoaded', function(){ recompute(); render(window.scrollY||0); });
   var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(function(){ layout(); render(window.scrollY||0); }, 160); }, { passive:true });
